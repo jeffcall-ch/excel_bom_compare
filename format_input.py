@@ -1,9 +1,11 @@
 import pandas as pd
 import pathlib
+import logging
 
 
 subfolder_of_excel_files = ""
-
+logging.basicConfig(filename='log.log', level=logging.DEBUG)
+logging.info('Started')
 
 def get_file_list():
     path_of_excel_files = pathlib.Path.cwd() / subfolder_of_excel_files
@@ -30,36 +32,50 @@ def concat_sheets(excel_file):
     return df_one_file
 
 
-def concat_files(file_list):
-    df = concat_sheets(file_list[0])
+def concat_files(file_list):   
+    global file_counter_log 
+    current_file = file_list[0]
+    try:
+        df = concat_sheets(current_file)
+        file_counter_log += 1
+        logging.info(f"file: {current_file.name} processed")
+    except:
+        logging.info(f"NOT PROCESSED file: {current_file.name}")
+    
     file_list.pop(0)
     for current_file in file_list:
-        df_current_file = concat_sheets(current_file)
-        df.append(df_current_file)
-    df.to_excel(pathlib.Path.cwd() / "vx_delta_excel" / "inmediate_output_merged_files.xls", index=False)    
+        try:
+            df_current_file = concat_sheets(current_file)
+            df = pd.concat([df, df_current_file])
+            file_counter_log += 1
+            logging.debug(f"file: {current_file.name} processed")
+        except:
+            logging.info(f"NOT PROCESSED file: {current_file.name}")
+        
+    logging.debug(f"Number of files processed: {file_counter_log}")
     return df
 
 
 def format_data(df):
-        # drop first column which only contains Q1 for all lines (SP3D macro)
-        df.drop(df.columns[0], axis=1, inplace=True)
-        # drop all lines which are empty
-        df.dropna(subset=['Description'], inplace=True)
-        # remove "m" unit from meter line items
-        df['Quantity'] = df['Quantity'].replace(' m','',regex=True)
-        # convert quantity to number format 
-        df['Quantity'] = df['Quantity'].apply(pd.to_numeric, errors='ignore')
-        # strip whitespace from Puma code
-        df['Puma Code'] = df['Puma Code'].str.strip()
-        # create sum quantities based on same Puma
-        df = df.groupby(['Puma Code']).agg({'Description':'first', 'NPD':'last','Puma Code':'last','Quantity':'sum'})
-        # df.to_excel(excel_file[:-4]+"_output.xls", index=False)
-        df.to_excel(pathlib.Path.cwd() / "vx_delta_excel" / "output.xls", index=False)
+    # drop first column which only contains Q1 for all lines (SP3D macro)
+    # drop "Item number" column, which is also not needed
+    df.drop(df.columns[0], axis=1, inplace=True)
+    df.drop(df.columns[0], axis=1, inplace=True)
+    # drop all lines which are empty
+    df.dropna(subset=['Description'], inplace=True)
+    # remove "m" unit from meter line items
+    df['Quantity'] = df['Quantity'].replace(' m','',regex=True)
+    # convert quantity to number format 
+    df['Quantity'] = df['Quantity'].apply(pd.to_numeric, errors='ignore')
+    # strip whitespace from Puma code
+    df['Puma Code'] = df['Puma Code'].str.strip()
+    # create sum quantities based on same Puma
+    df_formatted = df.groupby(['Puma Code']).agg({'Description':'first', 'NPD':'last','Puma Code':'last','Quantity':'sum'})
+    df_formatted.to_excel(pathlib.Path.cwd() / subfolder_of_excel_files /"processed_output.xls", index=False)
+    return df_formatted
 
 
-subfolder_of_excel_files = "v0_original_excels"
-for file in get_file_list():
-    print(file)
-
-df = concat_files(get_file_list())
-format_data(df)
+# subfolder_of_excel_files = "v0_original_excels"
+# file_counter_log = 0
+# df = concat_files(get_file_list())
+# format_data(df)
