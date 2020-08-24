@@ -71,7 +71,9 @@ def format_data(df):
     df['Puma Code'] = df['Puma Code'].str.strip()
     # create sum quantities based on same Puma
     df_formatted = df.groupby(['Puma Code']).agg({'Description':'first', 'NPD':'last','Puma Code':'last','Quantity':'sum'})
-    df_formatted.to_excel(pathlib.Path.cwd() / subfolder_of_excel_files /"processed_output.xls", index=False)
+    
+    # writing of intermediate excel files disabled by default. Enable my uncommenting.
+    # df_formatted.to_excel(pathlib.Path.cwd() / subfolder_of_excel_files /"processed_output.xls", index=False)
     return df_formatted
 
 

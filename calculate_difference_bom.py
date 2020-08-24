@@ -17,11 +17,13 @@ df_updated = df_list[1]
 
 # multiply original quantities by -1 to be able to add to updated values simply
 df_original["Quantity"] = -1 * df_original["Quantity"]
-df_original.to_excel(pathlib.Path.cwd() / "v0_original_excels" /"minus_one_output.xls", index=False)
+# writing of intermediate excel files disabled by default. Enable my uncommenting.
+# df_original.to_excel(pathlib.Path.cwd() / "v0_original_excels" /"minus_one_output.xls", index=False)
 
 # generated consolidated list with original (negative values) and updated (positive values). All rows are in.
 df_delta = pd.concat([df_original, df_updated])
-df_delta.to_excel(pathlib.Path.cwd() / "delta_output_all_data_in.xls", index=False)
+# writing of intermediate excel files disabled by default. Enable my uncommenting.
+# df_delta.to_excel(pathlib.Path.cwd() / "delta_output_all_data_in.xls", index=False)
 
 # create sum quantities based on same Puma Code
 df_delta = df_delta.groupby(df_delta.index).agg({'Description':'first', 'NPD':'last','Puma Code':'last','Quantity':'sum'})
