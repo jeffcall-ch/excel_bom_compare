@@ -1,10 +1,58 @@
+# cli.py and setup.py are needed for pyinstaller package to create a distributable *.exe file
+
 import pandas as pd
 import format_input as fi 
 import pathlib
 
+
 excel_folders = ["v0_original_excels", "v1_updated_excels"]
 df_list = []
 
+
+def get_col_widths(dataframe):
+    # First we find the maximum length of the index column   
+    idx_max = max([len(str(s)) for s in dataframe.index.values] + [len(str(dataframe.index.name))])
+    # Then, we concatenate this to the max of the lengths of column name and its values for each column, left to right
+    return [idx_max] + [max([len(str(s)) for s in dataframe[col].values] + [len(col)]) for col in dataframe.columns]
+
+
+def format_and_write_excel(df_input):
+    # Create a Pandas Excel writer using XlsxWriter as the engine.
+    
+    writer = pd.ExcelWriter(pathlib.Path.cwd() / "DELTA_LIST.xlsx", engine='xlsxwriter')
+    df_input.to_excel(writer, sheet_name='Sheet1')
+        
+    # Get the xlsxwriter workbook and worksheet objects.
+    workbook = writer.book
+    
+    # Add a format. Light red fill with dark red text.
+    format1 = workbook.add_format({'bg_color': '#FFC7CE',
+                                'font_color': '#9C0006'})
+
+    worksheet = writer.sheets['Sheet1']
+
+    # Set the conditional format range.
+    start_row = 1
+    start_col = 4
+    end_row = len(df_input)
+    end_col = start_col
+
+    # Apply a conditional format to the cell range.
+    worksheet.conditional_format(start_row, start_col, end_row, end_col,
+                                {'type':'cell',
+                                'criteria':'<',
+                                'value':0,
+                                'format':format1})
+
+    # set column width
+    for i, width in enumerate(get_col_widths(df_input)):
+        worksheet.set_column(i, i, width + 2)
+
+    # hide first index column 'Puma Code'
+    worksheet.set_column('A:A', None, None, {'hidden': True})
+    # Close the Pandas Excel writer and output the Excel file.
+    writer.save()
+    
 
 def main():
     for folder in excel_folders:
@@ -34,7 +82,8 @@ def main():
     df_delta = df_delta[(df_delta != 0).all(1)]
 
     # output writing
-    df_delta.to_excel(pathlib.Path.cwd() / "DELTA_LIST.xls", index=False)
+    #df_delta.to_excel(pathlib.Path.cwd() / "DELTA_LIST.xls", index=False)
+    format_and_write_excel(df_delta)
 
     # wait for user to close terminal
     prompt = "Excel compare finished. Hit any key to exit. See log.log file for results."

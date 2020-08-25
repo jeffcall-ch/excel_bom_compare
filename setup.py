@@ -1,3 +1,6 @@
+# this file defines the setup for pyinstaller for creating an *.exe package from the python project
+# to run pyinstaller: activate env, then run: pyinstaller cli.py --name bom_compare --onefile
+
 setup(
     name="excel-bom-compare",
     version="1.0.0",
