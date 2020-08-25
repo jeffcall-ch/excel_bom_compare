@@ -4,8 +4,9 @@ import logging
 
 
 subfolder_of_excel_files = ""
-logging.basicConfig(filename='log.log', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%m-%y %H:%M:%S', filename='log.log', level=logging.DEBUG)
 logging.info('Started')
+
 
 def get_file_list():
     path_of_excel_files = pathlib.Path.cwd() / subfolder_of_excel_files
