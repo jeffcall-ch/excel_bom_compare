@@ -11,7 +11,7 @@ logging.info('Started')
 def get_file_list():
     path_of_excel_files = pathlib.Path.cwd() / subfolder_of_excel_files
     file_list = []
-    for path in path_of_excel_files.glob("*.xls"):
+    for path in path_of_excel_files.glob("*.xls*"):
         file_list.append(path)
     return file_list
 
