@@ -1,7 +1,9 @@
 # cli.py and setup.py are needed for pyinstaller package to create a distributable *.exe file
 
 import pandas as pd
-import format_input as fi 
+import format_input_delta_delta as fi
+# the delta lists have different layout compared with the original lists
+# take care to import the correct module in the calculare_difference_bom.py
 import pathlib
 
 
